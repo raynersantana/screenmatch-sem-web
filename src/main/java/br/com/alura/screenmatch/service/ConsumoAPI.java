@@ -11,6 +11,7 @@ public class ConsumoAPI {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endereco)).build();
         HttpResponse<String> response;
+//        System.out.println(endereco);
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }catch (IOException e) {
