@@ -1,19 +1,46 @@
 package br.com.alura.screenmatch.model;
 
 import br.com.alura.screenmatch.service.ConsultaMyMemory;
+import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.OptionalDouble;
 
+@Entity
+@Table(name = "Series")
 public class Serie {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true)
     private String title;
     private Integer totalSeasons;
     private Double imbdRating;
     private String released;
+    @Enumerated(EnumType.STRING)
     private Category genre;
     private String actors;
     private String poster;
     private String plot;
+
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Episodio> episodios = new ArrayList<>();
+
+    public List<Episodio> getEpisodios() {
+        return episodios;
+    }
+
+    public void setEpisodios(List<Episodio> episodios) {
+        episodios.forEach(e -> e.setSerie(this));
+        this.episodios = episodios;
+    }
+
+    public Serie() {
+
+    }
 
     public Serie(DadosSerie dadosSerie) {
         this.title = dadosSerie.title();
@@ -35,7 +62,8 @@ public class Serie {
                 ", released='" + released + '\'' +
                 ", actors='" + actors + '\'' +
                 ", poster='" + poster + '\'' +
-                ", plot='" + plot + '\'';
+                ", plot='" + plot + '\'' +
+                ", episode='" + episodios + '\'';
     }
 
     public String getTitle() {
@@ -100,5 +128,13 @@ public class Serie {
 
     public void setPlot(String plot) {
         this.plot = plot;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
