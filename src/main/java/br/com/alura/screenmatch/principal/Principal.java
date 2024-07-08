@@ -33,8 +33,9 @@ public class Principal {
                     1 - Buscar séries
                     2 - Buscar episódios
                     3 - Listar séries
-                                    
-                    0 - Sair                                 
+                    4 - Buscar série por título
+                    5 - Busca série pelo nome do ator
+                    0 - Sair
                     """;
 
             System.out.println(menu);
@@ -51,6 +52,11 @@ public class Principal {
                 case 3:
                     listaSeriesBuscadas();
                     break;
+                case 4:
+                    buscaSeriePorTitle();
+                    break;
+                case 5:
+                    buscarSeriePorNomeAtor();
                 case 0:
                     System.out.println("Saindo...");
                     break;
@@ -79,8 +85,7 @@ public class Principal {
         System.out.println("Digite o nome da série para busca");
         var nomeSerie = leitura.nextLine();
         var json = consumo.obterDados(ENDERECO + nomeSerie.replace(" ", "+") + API_KEY);
-        DadosSerie dados = conversor.obterDados(json, DadosSerie.class);
-        return dados;
+        return conversor.obterDados(json, DadosSerie.class);
     }
 
     private void buscarEpisodioPorSerie(){
@@ -88,9 +93,7 @@ public class Principal {
         System.out.println("Escolha uma série pelo nome: ");
         var nomeSerie = leitura.nextLine();
 
-        Optional<Serie> serie = series.stream()
-                .filter(s -> s.getTitle().toLowerCase().contains(nomeSerie.toLowerCase()))
-                .findFirst();
+        Optional<Serie> serie = repository.findByTitleContainingIgnoreCase(nomeSerie);
 
         if(serie.isPresent()) {
 
@@ -110,5 +113,24 @@ public class Principal {
             serieEncontrada.setEpisodios(episodios);
             repository.save(serieEncontrada);
         }else System.out.println("Série não encontrada!");
+    }
+    private void buscaSeriePorTitle() {
+        System.out.println("Digite o nome da série para busca");
+        var nomeSerie = leitura.nextLine();
+
+        Optional<Serie> serieBuscada = repository.findByTitleContainingIgnoreCase(nomeSerie);
+        if(serieBuscada.isPresent()) {
+            System.out.println("Dados da série: " + serieBuscada.get());
+        }else System.out.println("Série não encontrada!");
+    }
+
+    private void buscarSeriePorNomeAtor() {
+        System.out.println("Digite o nome do ator");
+        var nomeAtor = leitura.nextLine();
+        System.out.println("Avaliações a partir de que valor?");
+        var valorAvaliacao = leitura.nextDouble();
+        List<Serie> seriesEncontradas = repository.findByActorsContainingIgnoreCaseAndImbdRatingGreaterThanEqual(nomeAtor, valorAvaliacao);
+        System.out.println("Lista de séries em que " + nomeAtor + " trabalhou");
+        seriesEncontradas.forEach(s -> System.out.println(s.getTitle() + " avaliação: " + s.getImbdRating()));
     }
 }
